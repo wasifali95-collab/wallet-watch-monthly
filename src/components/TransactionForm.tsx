@@ -4,6 +4,7 @@ import { Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { Transaction, TransactionType, CategoryType, CurrencyType } from '@/types/transaction';
 
 interface TransactionFormProps {
   onSubmit: (transaction: Transaction) => void;
@@ -14,10 +15,18 @@ const TransactionForm = ({ onSubmit }: TransactionFormProps) => {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState<CategoryType>('Food');
   const [description, setDescription] = useState('');
+  const [currency, setCurrency] = useState<CurrencyType>('PKR');
 
   const categories: CategoryType[] = type === 'expense' 
     ? ['Food', 'Transportation', 'Housing', 'Utilities', 'Entertainment', 'Healthcare', 'Shopping', 'Other']
     : ['Salary', 'Investment', 'Freelance', 'Other'];
+
+  const currencies = [
+    { code: 'PKR', symbol: 'Rs', label: 'Pakistani Rupee' },
+    { code: 'USD', symbol: '$', label: 'US Dollar' },
+    { code: 'EUR', symbol: '€', label: 'Euro' },
+    { code: 'GBP', symbol: '£', label: 'British Pound' },
+  ] as const;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +38,7 @@ const TransactionForm = ({ onSubmit }: TransactionFormProps) => {
       category,
       description,
       date: new Date().toISOString(),
+      currency,
     });
 
     setAmount('');
@@ -48,13 +58,25 @@ const TransactionForm = ({ onSubmit }: TransactionFormProps) => {
           </SelectContent>
         </Select>
 
-        <Input
-          type="number"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="flex-1"
-        />
+        <div className="flex-1 flex gap-2">
+          <Select value={currency} onValueChange={(value: CurrencyType) => setCurrency(value)}>
+            <SelectTrigger className="w-[100px]">
+              <SelectValue placeholder="Currency" />
+            </SelectTrigger>
+            <SelectContent>
+              {currencies.map(({ code, label }) => (
+                <SelectItem key={code} value={code}>{code}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Input
+            type="number"
+            placeholder="Amount"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="flex-1"
+          />
+        </div>
       </div>
 
       <Select value={category} onValueChange={(value: CategoryType) => setCategory(value)}>

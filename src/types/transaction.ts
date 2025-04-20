@@ -14,6 +14,18 @@ type CategoryType =
   | 'Investment'
   | 'Freelance';
 
+type CurrencyType = 
+  | 'USD'
+  | 'PKR'
+  | 'EUR'
+  | 'GBP';
+
+interface CurrencyConfig {
+  code: CurrencyType;
+  symbol: string;
+  label: string;
+}
+
 interface Transaction {
   id?: string;
   type: TransactionType;
@@ -21,4 +33,7 @@ interface Transaction {
   category: CategoryType;
   description: string;
   date: string;
+  currency: CurrencyType;
 }
+
+export type { Transaction, TransactionType, CategoryType, CurrencyType, CurrencyConfig };

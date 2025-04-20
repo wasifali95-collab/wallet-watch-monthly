@@ -1,6 +1,7 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 import { Card } from "@/components/ui/card";
+import type { Transaction } from '@/types/transaction';
 
 interface MonthlyReportProps {
   transactions: Transaction[];
@@ -8,17 +9,35 @@ interface MonthlyReportProps {
 
 const COLORS = ['#9b87f5', '#7E69AB', '#6E59A5', '#0EA5E9', '#F97316', '#D946EF', '#33C3F0', '#8B5CF6'];
 
+const getCurrencySymbol = (currency: string) => {
+  const symbols: Record<string, string> = {
+    PKR: 'Rs',
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+  };
+  return symbols[currency] || currency;
+};
+
 const MonthlyReport = ({ transactions }: MonthlyReportProps) => {
-  const totalIncome = transactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + t.amount, 0);
+  // Group transactions by currency
+  const groupedTransactions = transactions.reduce((acc, t) => {
+    if (!acc[t.currency]) {
+      acc[t.currency] = { income: 0, expenses: 0 };
+    }
+    if (t.type === 'income') {
+      acc[t.currency].income += t.amount;
+    } else {
+      acc[t.currency].expenses += t.amount;
+    }
+    return acc;
+  }, {} as Record<string, { income: number; expenses: number }>);
 
-  const totalExpenses = transactions
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + t.amount, 0);
-
+  // Get expense data for the primary currency (first transaction's currency or PKR)
+  const primaryCurrency = transactions[0]?.currency || 'PKR';
+  
   const expensesByCategory = transactions
-    .filter(t => t.type === 'expense')
+    .filter(t => t.type === 'expense' && t.currency === primaryCurrency)
     .reduce((acc, t) => {
       acc[t.category] = (acc[t.category] || 0) + t.amount;
       return acc;
@@ -33,16 +52,24 @@ const MonthlyReport = ({ transactions }: MonthlyReportProps) => {
     <div className="space-y-4">
       <h2 className="text-xl font-semibold mb-4">Monthly Overview</h2>
       
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <Card className="p-4 bg-green-50">
-          <div className="text-sm text-gray-600">Total Income</div>
-          <div className="text-xl font-bold text-green-600">${totalIncome.toFixed(2)}</div>
-        </Card>
-        
-        <Card className="p-4 bg-red-50">
-          <div className="text-sm text-gray-600">Total Expenses</div>
-          <div className="text-xl font-bold text-red-600">${totalExpenses.toFixed(2)}</div>
-        </Card>
+      <div className="grid grid-cols-1 gap-4 mb-6">
+        {Object.entries(groupedTransactions).map(([currency, { income, expenses }]) => (
+          <div key={currency} className="grid grid-cols-2 gap-4">
+            <Card className="p-4 bg-green-50">
+              <div className="text-sm text-gray-600">Total Income ({currency})</div>
+              <div className="text-xl font-bold text-green-600">
+                {getCurrencySymbol(currency)}{income.toFixed(2)}
+              </div>
+            </Card>
+            
+            <Card className="p-4 bg-red-50">
+              <div className="text-sm text-gray-600">Total Expenses ({currency})</div>
+              <div className="text-xl font-bold text-red-600">
+                {getCurrencySymbol(currency)}{expenses.toFixed(2)}
+              </div>
+            </Card>
+          </div>
+        ))}
       </div>
 
       {pieData.length > 0 ? (

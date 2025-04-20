@@ -2,11 +2,22 @@
 import { format } from 'date-fns';
 import { Trash } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import type { Transaction } from '@/types/transaction';
 
 interface TransactionListProps {
   transactions: Transaction[];
   onDelete: (id: string) => void;
 }
+
+const getCurrencySymbol = (currency: string) => {
+  const symbols: Record<string, string> = {
+    PKR: 'Rs',
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+  };
+  return symbols[currency] || currency;
+};
 
 const TransactionList = ({ transactions, onDelete }: TransactionListProps) => {
   if (transactions.length === 0) {
@@ -28,7 +39,8 @@ const TransactionList = ({ transactions, onDelete }: TransactionListProps) => {
                 <span className={`font-semibold ${
                   transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
                 }`}>
-                  {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toFixed(2)}
+                  {transaction.type === 'income' ? '+' : '-'}
+                  {getCurrencySymbol(transaction.currency)}{transaction.amount.toFixed(2)}
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm text-gray-500">

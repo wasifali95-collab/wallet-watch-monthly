@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import TransactionForm from '@/components/TransactionForm';
 import TransactionList from '@/components/TransactionList';
 import MonthlyReport from '@/components/MonthlyReport';
+import type { Transaction } from '@/types/transaction';
 
 const Index = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
