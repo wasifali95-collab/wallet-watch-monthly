@@ -1,11 +1,40 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from 'react';
+import { Card } from "@/components/ui/card";
+import TransactionForm from '@/components/TransactionForm';
+import TransactionList from '@/components/TransactionList';
+import MonthlyReport from '@/components/MonthlyReport';
 
 const Index = () => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  const addTransaction = (transaction: Transaction) => {
+    setTransactions([...transactions, { ...transaction, id: Date.now().toString() }]);
+  };
+
+  const deleteTransaction = (id: string) => {
+    setTransactions(transactions.filter(t => t.id !== id));
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <h1 className="text-3xl font-bold text-center mb-6 text-[#1A1F2C]">Wallet Watch</h1>
+      
+      <div className="max-w-md mx-auto space-y-6">
+        <Card className="p-4 shadow-lg">
+          <TransactionForm onSubmit={addTransaction} />
+        </Card>
+
+        <Card className="p-4 shadow-lg">
+          <MonthlyReport transactions={transactions} />
+        </Card>
+
+        <Card className="p-4 shadow-lg">
+          <TransactionList 
+            transactions={transactions}
+            onDelete={deleteTransaction}
+          />
+        </Card>
       </div>
     </div>
   );
